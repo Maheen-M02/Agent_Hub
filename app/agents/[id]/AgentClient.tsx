@@ -10,7 +10,6 @@ import { ArrowLeft, Download, Heart, Share2 } from 'lucide-react';
 export default function AgentClient() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-
   const [agent, setAgent] = useState<Agent | null>(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
@@ -18,39 +17,43 @@ export default function AgentClient() {
   const [error, setError] = useState('');
   const [editMode, setEditMode] = useState(false);
 
-  // For edit mode
+  // Edit fields
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
 
   useEffect(() => {
     const fetchAgent = async () => {
+      setLoading(true);
       try {
         const { data: authData } = await supabase.auth.getUser();
         setUser(authData.user);
 
+        // Fetch agent
         const { data, error } = await supabase
           .from('agents')
           .select('*')
           .eq('id', id)
           .single();
+
         if (error) throw error;
+        if (!data) throw new Error('Agent not found');
 
         setAgent(data);
         setName(data.name);
         setDescription(data.description || '');
 
-        // Check favorite status
+        // Check if favorited
         if (authData.user) {
-          const { data: favorite } = await supabase
+          const { data: fav } = await supabase
             .from('favorites')
             .select('id')
             .eq('user_id', authData.user.id)
             .eq('agent_id', id)
             .single();
-          setIsFavorited(!!favorite);
+          setIsFavorited(!!fav);
         }
       } catch (err: any) {
-        setError(err.message);
+        setError(err.message || 'Failed to fetch agent');
       } finally {
         setLoading(false);
       }
@@ -61,6 +64,7 @@ export default function AgentClient() {
 
   const handleFavorite = async () => {
     if (!user || !agent) return;
+
     try {
       if (isFavorited) {
         await supabase
@@ -75,13 +79,16 @@ export default function AgentClient() {
           .insert({ user_id: user.id, agent_id: agent.id });
         setIsFavorited(true);
       }
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
     }
   };
 
   const handleDownload = () => {
-    if (!agent?.workflow_json) return;
+    if (!agent?.workflow_json) {
+      alert('Workflow JSON not available');
+      return;
+    }
     const blob = new Blob([JSON.stringify(agent.workflow_json, null, 2)], {
       type: 'application/json',
     });
@@ -122,6 +129,7 @@ export default function AgentClient() {
         .update({ name, description })
         .eq('id', agent.id)
         .eq('created_by', user.id);
+
       if (error) throw error;
       setAgent({ ...agent, name, description });
       setEditMode(false);
