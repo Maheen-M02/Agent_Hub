@@ -1,14 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { supabase, Agent } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Download, Heart, Share2 } from 'lucide-react';
 
-export default function AgentClient() {
-  const { id } = useParams<{ id: string }>();
+interface AgentClientProps {
+  agentId: string;
+}
+
+export default function AgentClient({ agentId }: AgentClientProps) {
   const router = useRouter();
   const [agent, setAgent] = useState<Agent | null>(null);
   const [loading, setLoading] = useState(true);
@@ -23,60 +26,48 @@ export default function AgentClient() {
 
   useEffect(() => {
     const fetchAgent = async () => {
-      setLoading(true);
       try {
         const { data: authData } = await supabase.auth.getUser();
         setUser(authData.user);
 
-        // Fetch agent
         const { data, error } = await supabase
           .from('agents')
           .select('*')
-          .eq('id', id)
+          .eq('id', agentId)
           .single();
-
         if (error) throw error;
-        if (!data) throw new Error('Agent not found');
 
         setAgent(data);
         setName(data.name);
         setDescription(data.description || '');
 
-        // Check if favorited
         if (authData.user) {
-          const { data: fav } = await supabase
+          const { data: favorite } = await supabase
             .from('favorites')
             .select('id')
             .eq('user_id', authData.user.id)
-            .eq('agent_id', id)
+            .eq('agent_id', agentId)
             .single();
-          setIsFavorited(!!fav);
+          setIsFavorited(!!favorite);
         }
       } catch (err: any) {
-        setError(err.message || 'Failed to fetch agent');
+        setError(err.message);
       } finally {
         setLoading(false);
       }
     };
 
     fetchAgent();
-  }, [id]);
+  }, [agentId]);
 
   const handleFavorite = async () => {
     if (!user || !agent) return;
-
     try {
       if (isFavorited) {
-        await supabase
-          .from('favorites')
-          .delete()
-          .eq('user_id', user.id)
-          .eq('agent_id', agent.id);
+        await supabase.from('favorites').delete().eq('user_id', user.id).eq('agent_id', agent.id);
         setIsFavorited(false);
       } else {
-        await supabase
-          .from('favorites')
-          .insert({ user_id: user.id, agent_id: agent.id });
+        await supabase.from('favorites').insert({ user_id: user.id, agent_id: agent.id });
         setIsFavorited(true);
       }
     } catch (err) {
@@ -85,13 +76,8 @@ export default function AgentClient() {
   };
 
   const handleDownload = () => {
-    if (!agent?.workflow_json) {
-      alert('Workflow JSON not available');
-      return;
-    }
-    const blob = new Blob([JSON.stringify(agent.workflow_json, null, 2)], {
-      type: 'application/json',
-    });
+    if (!agent?.workflow_json) return;
+    const blob = new Blob([JSON.stringify(agent.workflow_json, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -106,11 +92,7 @@ export default function AgentClient() {
     if (!agent) return;
     try {
       if (navigator.share) {
-        await navigator.share({
-          title: agent.name,
-          text: agent.description || '',
-          url: window.location.href,
-        });
+        await navigator.share({ title: agent.name, text: agent.description || '', url: window.location.href });
       } else {
         await navigator.clipboard.writeText(window.location.href);
         alert('Link copied to clipboard!');
@@ -129,7 +111,6 @@ export default function AgentClient() {
         .update({ name, description })
         .eq('id', agent.id)
         .eq('created_by', user.id);
-
       if (error) throw error;
       setAgent({ ...agent, name, description });
       setEditMode(false);
@@ -150,20 +131,13 @@ export default function AgentClient() {
         <Button variant="ghost" onClick={() => router.back()}>
           <ArrowLeft /> Back
         </Button>
-        {isCreator && !editMode && (
-          <Button onClick={() => setEditMode(true)}>Edit Agent</Button>
-        )}
+        {isCreator && !editMode && <Button onClick={() => setEditMode(true)}>Edit Agent</Button>}
       </div>
 
       <Card>
         <CardHeader>
           {editMode ? (
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full border p-2 rounded"
-            />
+            <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full border p-2 rounded" />
           ) : (
             <CardTitle>{agent.name}</CardTitle>
           )}
@@ -171,32 +145,19 @@ export default function AgentClient() {
         <CardContent>
           {editMode ? (
             <>
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="w-full border p-2 rounded mb-4"
-              />
+              <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="w-full border p-2 rounded mb-4" />
               <div className="flex space-x-2">
                 <Button onClick={handleSaveEdit}>Save</Button>
-                <Button variant="secondary" onClick={() => setEditMode(false)}>
-                  Cancel
-                </Button>
+                <Button variant="secondary" onClick={() => setEditMode(false)}>Cancel</Button>
               </div>
             </>
           ) : (
             <>
               <p className="mb-4">{agent.description}</p>
               <div className="flex space-x-2">
-                <Button onClick={handleDownload}>
-                  <Download className="w-4 h-4 mr-1" /> Download Workflow
-                </Button>
-                <Button onClick={handleShare}>
-                  <Share2 className="w-4 h-4 mr-1" /> Share
-                </Button>
-                <Button
-                  variant={isFavorited ? 'destructive' : 'default'}
-                  onClick={handleFavorite}
-                >
+                <Button onClick={handleDownload}><Download className="w-4 h-4 mr-1" /> Download Workflow</Button>
+                <Button onClick={handleShare}><Share2 className="w-4 h-4 mr-1" /> Share</Button>
+                <Button variant={isFavorited ? 'destructive' : 'default'} onClick={handleFavorite}>
                   <Heart className="w-4 h-4 mr-1" /> {isFavorited ? 'Favorited' : 'Favorite'}
                 </Button>
               </div>
