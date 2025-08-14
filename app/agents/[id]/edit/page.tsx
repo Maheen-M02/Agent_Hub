@@ -1,14 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import AgentClient from './AgentClient';
 
-export async function generateStaticParams() {
-  const { data, error } = await supabase.from('agents').select('id');
-  if (error) {
-    console.error('Error fetching agent IDs:', error);
-    return [];
-  }
-  return data.map(agent => ({ id: String(agent.id) }));
-}
+
 
 export default async function AgentPage({ params }: { params: { id: string } }) {
   const { data: agent, error } = await supabase
