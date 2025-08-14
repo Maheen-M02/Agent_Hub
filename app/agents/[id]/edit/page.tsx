@@ -5,7 +5,9 @@ import { useParams, useRouter } from 'next/navigation';
 import { supabase, Agent } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { ArrowLeft, Save } from 'lucide-react';
 
 export default function AgentEditPage() {
   const { id } = useParams<{ id: string }>();
@@ -66,33 +68,60 @@ export default function AgentEditPage() {
     }
   };
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p className="text-red-600">{error}</p>;
-  if (!agent) return <p>Agent not found</p>;
+  if (loading) return <p className="text-gray-500 text-center py-10">Loading agent data...</p>;
+  if (error) return <p className="text-red-600 text-center py-10">{error}</p>;
+  if (!agent) return <p className="text-gray-500 text-center py-10">Agent not found</p>;
 
   return (
-    <div className="max-w-3xl mx-auto py-8">
-      <Button variant="ghost" onClick={() => router.back()}>
-        <ArrowLeft /> Back
+    <div className="max-w-3xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+      {/* Back Button */}
+      <Button variant="ghost" onClick={() => router.back()} className="mb-6">
+        <ArrowLeft className="w-4 h-4 mr-2" /> Back
       </Button>
 
-      <Card className="mt-4">
+      {/* Edit Card */}
+      <Card className="shadow-lg border border-gray-200">
         <CardHeader>
-          <CardTitle>Edit Agent</CardTitle>
+          <CardTitle className="text-2xl font-semibold text-gray-900">
+            Edit Agent Details
+          </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <input
-            type="text"
-            className="w-full border p-2 rounded"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <textarea
-            className="w-full border p-2 rounded"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-          <Button onClick={handleSave}>Save Changes</Button>
+        <CardContent className="space-y-6">
+          {/* Name Input */}
+          <div>
+            <label className="block mb-2 text-gray-700 font-medium">Agent Name</label>
+            <Input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Enter agent name"
+              className="border-gray-300 focus:ring-purple-500 focus:border-purple-500"
+            />
+          </div>
+
+          {/* Description Input */}
+          <div>
+            <label className="block mb-2 text-gray-700 font-medium">Description</label>
+            <Textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Enter agent description"
+              rows={5}
+              className="border-gray-300 focus:ring-purple-500 focus:border-purple-500"
+            />
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => router.back()}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSave}
+              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 flex items-center gap-2"
+            >
+              <Save className="w-4 h-4" /> Save Changes
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>
