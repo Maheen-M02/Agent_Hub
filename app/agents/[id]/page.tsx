@@ -1,32 +1,43 @@
-import { supabase } from '@/lib/supabase';
+import { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
 import AgentClient from './AgentClient';
+import { supabase, Agent } from '@/lib/supabase';
 
-export async function generateStaticParams() {
-  const { data, error } = await supabase.from('agents').select('id');
-  if (error) {
-    console.error('Error fetching agent IDs:', error);
-    return [];
-  }
-  return data.map(agent => ({ id: String(agent.id) }));
-}
+export default function AgentDetailPage() {
+  const { id } = useParams<{ id: string }>();
+  const [agent, setAgent] = useState<Agent | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-export default async function AgentPage({ params }: { params: { id: string } }) {
-  const { data: agent, error } = await supabase
-    .from('agents')
-    .select('*')
-    .eq('id', params.id)
-    .single();
+  useEffect(() => {
+    if (!id) return;
 
-  if (error || !agent) {
-    return <div className="p-8 text-red-500 font-semibold">Agent not found</div>;
-  }
+    const fetchAgent = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('agents')
+          .select('*')
+          .eq('id', id)
+          .single();
+
+        if (error) throw error;
+        setAgent(data);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAgent();
+  }, [id]);
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error}</p>;
+  if (!agent) return <p>Agent not found</p>;
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
-      <h1 className="text-4xl font-bold text-gray-900 mb-4">{agent.name}</h1>
-      <p className="text-lg text-gray-600 mb-6">{agent.description || 'No description available'}</p>
-
-      {/* Client-side interactive component */}
+    <div className="max-w-5xl mx-auto py-8">
       <AgentClient agent={agent} />
     </div>
   );
