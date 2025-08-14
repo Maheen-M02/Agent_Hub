@@ -3,24 +3,25 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { supabase, Agent } from '@/lib/supabase';
-import AgentClient from './AgentClient';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ArrowLeft, Download, Share2, Heart } from 'lucide-react';
 
-export default function AgentPage() {
+export default function AgentClient() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const [agent, setAgent] = useState<Agent | null>(null);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<any>(null);
+  const [isFavorited, setIsFavorited] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (!id) {
-      setError('Invalid agent ID');
-      setLoading(false);
-      return;
-    }
-
     const fetchAgent = async () => {
       try {
+        const { data: authData } = await supabase.auth.getUser();
+        setUser(authData.user);
+
         const { data, error } = await supabase
           .from('agents')
           .select('*')
@@ -29,8 +30,18 @@ export default function AgentPage() {
 
         if (error) throw error;
         setAgent(data);
+
+        if (authData.user) {
+          const { data: favorite } = await supabase
+            .from('favorites')
+            .select('id')
+            .eq('user_id', authData.user.id)
+            .eq('agent_id', id)
+            .single();
+          setIsFavorited(!!favorite);
+        }
       } catch (err: any) {
-        setError(err.message || 'Failed to fetch agent');
+        setError(err.message);
       } finally {
         setLoading(false);
       }
@@ -39,9 +50,100 @@ export default function AgentPage() {
     fetchAgent();
   }, [id]);
 
-  if (loading) return <p>Loading agent...</p>;
+  const handleFavorite = async () => {
+    if (!user || !agent) return;
+    try {
+      if (isFavorited) {
+        await supabase
+          .from('favorites')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('agent_id', agent.id);
+        setIsFavorited(false);
+      } else {
+        await supabase
+          .from('favorites')
+          .insert({ user_id: user.id, agent_id: agent.id });
+        setIsFavorited(true);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDownload = () => {
+    if (!agent?.workflow_json) return;
+    const blob = new Blob([JSON.stringify(agent.workflow_json, null, 2)], {
+      type: 'application/json',
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${agent.name.replace(/\s+/g, '_')}_workflow.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleShare = async () => {
+    if (!agent) return;
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: agent.name,
+          text: agent.description || '',
+          url: window.location.href,
+        });
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        alert('Link copied to clipboard!');
+      }
+    } catch (err) {
+      console.error('Share failed:', err);
+      alert('Share failed. Please copy manually.');
+    }
+  };
+
+  if (loading) return <p>Loading...</p>;
   if (error) return <p className="text-red-600">{error}</p>;
   if (!agent) return <p>Agent not found</p>;
 
-  return <AgentClient agent={agent} />;
+  const isCreator = user?.id === agent.created_by;
+
+  return (
+    <div className="max-w-4xl mx-auto py-8">
+      <Button variant="ghost" onClick={() => router.back()}>
+        <ArrowLeft /> Back
+      </Button>
+
+      <Card className="mt-4">
+        <CardHeader>
+          <CardTitle>{agent.name}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="mb-4">{agent.description}</p>
+          <div className="flex gap-2">
+            <Button onClick={handleDownload}>
+              <Download className="w-4 h-4 mr-1" /> Download
+            </Button>
+            <Button onClick={handleShare}>
+              <Share2 className="w-4 h-4 mr-1" /> Share
+            </Button>
+            <Button
+              variant={isFavorited ? 'destructive' : 'default'}
+              onClick={handleFavorite}
+            >
+              <Heart className="w-4 h-4 mr-1" /> {isFavorited ? 'Favorited' : 'Favorite'}
+            </Button>
+            {isCreator && (
+              <Button onClick={() => router.push(`/agents/${id}/edit`)}>
+                Edit Agent
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
 }
