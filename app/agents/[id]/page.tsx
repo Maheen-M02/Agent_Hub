@@ -1,24 +1,47 @@
-import AgentClient from './AgentClient';
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import { supabase, Agent } from '@/lib/supabase';
+import AgentClient from './AgentClient';
 
-interface Props {
-  params: { id: string };
-}
+export default function AgentPage() {
+  const { id } = useParams<{ id: string }>();
+  const router = useRouter();
+  const [agent, setAgent] = useState<Agent | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-export default async function AgentDetailPage({ params }: Props) {
-  const { id } = params;
+  useEffect(() => {
+    if (!id) {
+      setError('Invalid agent ID');
+      setLoading(false);
+      return;
+    }
 
-  // Fetch agent data server-side
-  const { data: agent, error } = await supabase
-    .from<Agent>('agents')
-    .select('*')
-    .eq('id', id)
-    .single();
+    const fetchAgent = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('agents')
+          .select('*')
+          .eq('id', id)
+          .single();
 
-  if (error || !agent) {
-    return <p>Agent not found.</p>;
-  }
+        if (error) throw error;
+        setAgent(data);
+      } catch (err: any) {
+        setError(err.message || 'Failed to fetch agent');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // Pass agent data to client component
+    fetchAgent();
+  }, [id]);
+
+  if (loading) return <p>Loading agent...</p>;
+  if (error) return <p className="text-red-600">{error}</p>;
+  if (!agent) return <p>Agent not found</p>;
+
   return <AgentClient agent={agent} />;
 }
