@@ -5,16 +5,22 @@ import { useParams, useRouter } from 'next/navigation';
 import { supabase, Agent } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Download, Heart, Share2, Play } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { ArrowLeft, Download, Heart, Share2 } from 'lucide-react';
 
-export default function AgentPage() {
+export default function AgentClient() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+
   const [agent, setAgent] = useState<Agent | null>(null);
-  const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
-  const [isFavorited, setIsFavorited] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
 
   useEffect(() => {
     const fetchAgent = async () => {
@@ -27,9 +33,11 @@ export default function AgentPage() {
           .select('*')
           .eq('id', id)
           .single();
-
         if (error) throw error;
+
         setAgent(data);
+        setName(data.name);
+        setDescription(data.description || '');
 
         if (authData.user) {
           const { data: favorite } = await supabase
@@ -52,7 +60,6 @@ export default function AgentPage() {
 
   const handleFavorite = async () => {
     if (!user || !agent) return;
-
     try {
       if (isFavorited) {
         await supabase
@@ -74,8 +81,9 @@ export default function AgentPage() {
 
   const handleDownload = () => {
     if (!agent?.workflow_json) return;
-
-    const blob = new Blob([JSON.stringify(agent.workflow_json, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(agent.workflow_json, null, 2)], {
+      type: 'application/json',
+    });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -88,7 +96,6 @@ export default function AgentPage() {
 
   const handleShare = async () => {
     if (!agent) return;
-
     try {
       if (navigator.share) {
         await navigator.share({
@@ -101,62 +108,90 @@ export default function AgentPage() {
         alert('Link copied to clipboard!');
       }
     } catch (err) {
-      console.error(err);
+      console.error('Share failed:', err);
       alert('Share failed. Please try manually.');
     }
   };
 
-  if (loading) return <p className="text-gray-500 text-center py-10">Loading agent...</p>;
-  if (error) return <p className="text-red-600 text-center py-10">{error}</p>;
-  if (!agent) return <p className="text-gray-500 text-center py-10">Agent not found</p>;
+  const handleSaveEdit = async () => {
+    if (!user || !agent) return;
+    try {
+      const { error } = await supabase
+        .from('agents')
+        .update({ name, description })
+        .eq('id', agent.id)
+        .eq('created_by', user.id);
+      if (error) throw error;
+      setAgent({ ...agent, name, description });
+      setEditMode(false);
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
+
+  if (loading) return <p className="text-center py-12 text-gray-500">Loading agent...</p>;
+  if (error) return <p className="text-center py-12 text-red-600">{error}</p>;
+  if (!agent) return <p className="text-center py-12 text-gray-500">Agent not found</p>;
 
   const isCreator = user?.id === agent.created_by;
 
   return (
-    <div className="max-w-3xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
       {/* Back Button */}
-      <Button variant="ghost" onClick={() => router.back()} className="mb-6">
-        <ArrowLeft className="w-4 h-4 mr-2" /> Back
-      </Button>
+      <div className="mb-6 flex items-center gap-2">
+        <Button variant="ghost" onClick={() => router.back()}><ArrowLeft /> Back</Button>
+        {isCreator && !editMode && (
+          <Button onClick={() => setEditMode(true)}>Edit Agent</Button>
+        )}
+      </div>
 
       {/* Agent Card */}
       <Card className="shadow-lg border border-gray-200">
         <CardHeader>
-          <CardTitle className="text-2xl font-semibold text-gray-900">{agent.name}</CardTitle>
+          {editMode ? (
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full border rounded px-3 py-2 font-semibold text-lg"
+            />
+          ) : (
+            <CardTitle className="text-2xl font-bold">{agent.name}</CardTitle>
+          )}
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-gray-700">{agent.description || 'No description provided.'}</p>
-
-          {/* Action Buttons */}
-          <div className="flex flex-wrap gap-3">
-            <Button
-              onClick={handleDownload}
-              className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
-            >
-              <Download className="w-4 h-4" /> Download Workflow
-            </Button>
-            <Button
-              onClick={handleShare}
-              className="flex items-center gap-2 border border-gray-300 hover:bg-gray-50"
-            >
-              <Share2 className="w-4 h-4" /> Share
-            </Button>
-            <Button
-              onClick={handleFavorite}
-              variant={isFavorited ? 'destructive' : 'default'}
-              className="flex items-center gap-2"
-            >
-              <Heart className="w-4 h-4" /> {isFavorited ? 'Favorited' : 'Favorite'}
-            </Button>
-            {isCreator && (
-              <Button
-                onClick={() => router.push(`/agents/${agent.id}/edit`)}
-                className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white"
-              >
-                Edit Agent
-              </Button>
-            )}
-          </div>
+          {editMode ? (
+            <>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="w-full border rounded px-3 py-2"
+              />
+              <div className="flex gap-2">
+                <Button onClick={handleSaveEdit}>Save</Button>
+                <Button variant="secondary" onClick={() => setEditMode(false)}>Cancel</Button>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="text-gray-700">{agent.description}</p>
+              <div className="flex flex-wrap gap-2 mt-4">
+                <Button onClick={handleDownload} className="flex items-center gap-1">
+                  <Download className="w-4 h-4" /> Download
+                </Button>
+                <Button onClick={handleShare} className="flex items-center gap-1">
+                  <Share2 className="w-4 h-4" /> Share
+                </Button>
+                <Button
+                  variant={isFavorited ? 'destructive' : 'default'}
+                  onClick={handleFavorite}
+                  className="flex items-center gap-1"
+                >
+                  <Heart className="w-4 h-4" /> {isFavorited ? 'Favorited' : 'Favorite'}
+                </Button>
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
     </div>
