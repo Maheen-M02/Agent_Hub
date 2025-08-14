@@ -5,12 +5,12 @@ import { useParams, useRouter } from 'next/navigation';
 import { supabase, Agent } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Download, Heart, Share2, Play } from 'lucide-react';
+import { ArrowLeft, Download, Heart, Share2 } from 'lucide-react';
 
 export default function AgentClient() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+
   const [agent, setAgent] = useState<Agent | null>(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
@@ -39,6 +39,7 @@ export default function AgentClient() {
         setName(data.name);
         setDescription(data.description || '');
 
+        // Check favorite status
         if (authData.user) {
           const { data: favorite } = await supabase
             .from('favorites')
