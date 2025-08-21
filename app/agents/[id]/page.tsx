@@ -45,7 +45,7 @@ export default function AgentClient() {
             .select('id')
             .eq('user_id', authData.user.id)
             .eq('agent_id', id)
-            .single();
+            .maybeSingle();
           setIsFavorited(!!favorite);
         }
       } catch (err: any) {

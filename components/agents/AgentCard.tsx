@@ -29,7 +29,7 @@ export function AgentCard({ agent, onRun }: AgentCardProps) {
           .select('id')
           .eq('user_id', user.id)
           .eq('agent_id', agent.id)
-          .single();
+          .maybeSingle();
         
         setIsFavorited(!!data);
       }
