@@ -4,7 +4,7 @@ import { getChatResponse } from '@/lib/gemini';
 
 export async function POST(request: NextRequest) {
   try {
-    const { message } = await request.json();
+    const { message, conversationHistory = [] } = await request.json();
 
     if (!message) {
       return NextResponse.json(
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
       .from('agents')
       .select('id, name, description, category');
 
-    const response = await getChatResponse(message, agents || []);
+    const response = await getChatResponse(message, agents || [], conversationHistory);
 
     return NextResponse.json({ response });
 
