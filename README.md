@@ -132,11 +132,11 @@ Contributions are welcome!
 
 ## 📜 License  
 
-MIT License © 2025 [Your Name]  
+MIT License © 2025 [Maheen Meshram]  
 
 ---
 
 ## 🌐 Connect  
 
-- GitHub: [your-username](https://github.com/your-username)  
-- LinkedIn: [your-linkedin](https://linkedin.com/in/your-profile)  
+- GitHub: [username](https://github.com/Maheen-M02)  
+- LinkedIn: [linkedin](nkedin.com/in/maheen-meshram-965066284/)  
