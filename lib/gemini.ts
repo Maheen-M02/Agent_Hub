@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const apiKey = process.env.GOOGLE_GEMINI_API_KEY || 'AIzaSyA2OLm2A1OK3wuxgKPmnspU-ou4_HpincE';
+const apiKey = process.env.GOOGLE_GEMINI_API_KEY || 'AIzaSyCS-0iCiE5WJTzEJ9IJO8GjomLy6l6nEGI';
 
 if (!apiKey) {
   console.warn('Google Gemini API key not found');

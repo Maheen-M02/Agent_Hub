@@ -20,13 +20,11 @@ export function ChatInterface() {
     {
       id: '1',
       type: 'assistant',
-      content: `Hello! I'm your AI assistant for the Agent Hub platform. I can help you with:
-
+      content: `Hello! I'm your AI assistant for the Agent Hub platform. I can help you with:\n
 🤖 **Find existing agents** - Search and recommend from our library
 🛠️ **Create new agents** - Step-by-step guidance with code examples
 ⚡ **Technical support** - n8n workflows, APIs, integrations
-💡 **General AI help** - Any questions about AI, automation, or technology
-
+💡 **General AI help** - Any questions about AI, automation, or technology\n
 What would you like to work on today?`,
       timestamp: new Date(),
     },
@@ -51,7 +49,10 @@ What would you like to work on today?`,
     scrollToBottom();
   }, [messages]);
 
-  const handleSend = async (messageText?: string) => {
+  const handleSend = async (event?: React.MouseEvent<HTMLButtonElement>, messageText?: string) => {
+    if (event) {
+      event.preventDefault();
+    }
     const textToSend = messageText || input;
     if (!textToSend.trim() || isLoading) return;
 
@@ -103,13 +104,13 @@ What would you like to work on today?`,
   };
 
   const handleQuickAction = (actionText: string) => {
-    handleSend(actionText);
+    handleSend(undefined, actionText);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleSend();
+      handleSend(undefined, input);
     }
   };
 
@@ -251,7 +252,7 @@ What would you like to work on today?`,
                 className="flex-1 border-gray-300 focus:border-purple-500 focus:ring-purple-500"
               />
               <Button
-                onClick={handleSend}
+                onClick={() => handleSend(undefined, input)}
                 disabled={!input.trim() || isLoading}
                 className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
               >
