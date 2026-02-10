@@ -181,9 +181,34 @@ What would you like to work on today?`,
                     }`}
                   >
                     <div className={`text-sm prose prose-sm max-w-none ${
-                      message.type === 'user' ? 'prose-invert' : ''
-                    }`}>
-                      <ReactMarkdown>{message.content}</ReactMarkdown>
+                      message.type === 'user' ? 'prose-invert' : 'prose-slate'
+                    }`}
+                    style={{
+                      lineHeight: '1.6',
+                    }}
+                    >
+                      <ReactMarkdown
+                        components={{
+                          h1: ({node, ...props}) => <h1 className="text-xl font-bold mt-4 mb-2" {...props} />,
+                          h2: ({node, ...props}) => <h2 className="text-lg font-bold mt-3 mb-2" {...props} />,
+                          h3: ({node, ...props}) => <h3 className="text-base font-bold mt-2 mb-1" {...props} />,
+                          p: ({node, ...props}) => <p className="mb-2" {...props} />,
+                          ul: ({node, ...props}) => <ul className="list-disc ml-4 mb-2 space-y-1" {...props} />,
+                          ol: ({node, ...props}) => <ol className="list-decimal ml-4 mb-2 space-y-1" {...props} />,
+                          li: ({node, ...props}) => <li className="mb-1" {...props} />,
+                          strong: ({node, ...props}) => <strong className="font-bold" {...props} />,
+                          em: ({node, ...props}) => <em className="italic" {...props} />,
+                          code: ({node, inline, ...props}: any) => 
+                            inline ? (
+                              <code className="bg-gray-200 px-1 py-0.5 rounded text-sm" {...props} />
+                            ) : (
+                              <code className="block bg-gray-200 p-2 rounded text-sm overflow-x-auto" {...props} />
+                            ),
+                          hr: ({node, ...props}) => <hr className="my-3 border-gray-300" {...props} />,
+                        }}
+                      >
+                        {message.content}
+                      </ReactMarkdown>
                     </div>
                     <div className={`text-xs mt-2 opacity-70 ${
                       message.type === 'user' ? 'text-purple-100' : 'text-gray-500'

@@ -66,20 +66,40 @@ git clone https://github.com/your-username/agent_hub.git
 cd agent_hub
 ```
 
-### 2. Setup Supabase  
+### 2. Install Dependencies  
+```bash
+npm install
+```
+
+### 3. Setup Environment Variables  
+- Copy `.env.example` to `.env`:  
+  ```bash
+  copy .env.example .env
+  ```
 - Create a new project on [Supabase](https://supabase.com).  
 - Copy your **API keys** and **project URL**.  
 - Add them to `.env` file:  
 
 ```env
-SUPABASE_URL=your_supabase_url
-SUPABASE_KEY=your_supabase_key
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+GOOGLE_GEMINI_API_KEY=your_gemini_api_key
 ```
 
-### 3. Run Frontend (Bolt.dev)  
-If using [Bolt.dev](https://bolt.new), open the project in Bolt and link to the Supabase backend.  
+### 4. Run Development Server  
+```bash
+npm run dev
+```
 
-### 4. Import Agents  
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### 5. Build for Production  
+```bash
+npm run build
+npm start
+```
+
+### 6. Import Agents  
 - Add agent configurations via JSON.  
 - Or create agents via the UI.  
 
