@@ -10,23 +10,21 @@ const Antigravity = dynamic(() => import('./Antigravity'), {
 export function AntigravityBackground() {
   return (
     <div 
-      className="fixed inset-0 w-full h-full pointer-events-none" 
+      className="fixed inset-0" 
       style={{ 
-        zIndex: 9999,
-        width: '100vw',
-        height: '100vh',
-        mixBlendMode: 'screen'
+        zIndex: 1,
+        pointerEvents: 'none'
       }}
     >
       <Suspense fallback={null}>
         <Antigravity
-          count={200}
-          magnetRadius={8}
-          ringRadius={10}
+          count={150}
+          magnetRadius={20}
+          ringRadius={15}
           waveSpeed={0.4}
           waveAmplitude={1}
-          particleSize={2.5}
-          lerpSpeed={0.05}
+          particleSize={1.5}
+          lerpSpeed={0.08}
           color="#a855f7"
           autoAnimate={true}
           particleVariance={1}

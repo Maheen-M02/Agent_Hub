@@ -18,11 +18,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="scroll-smooth">
-      <body className={`${inter.className} overflow-y-auto relative`}>
-        <div className="relative" style={{ zIndex: 1 }}>
+      <body className={`${inter.className} overflow-y-auto relative bg-white`}>
+        <AntigravityBackground />
+        <div className="relative pointer-events-auto" style={{ zIndex: 2 }}>
           {children}
         </div>
-        <AntigravityBackground />
         <FloatingAssistant />
       </body>
     </html>

@@ -157,23 +157,23 @@ export default function CreateAgentPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen bg-transparent">
       <Header searchQuery={searchQuery} onSearchChange={setSearchQuery} />
       
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Page Header */}
         <div className="mb-12 text-center">
-          <Badge className="bg-gradient-to-r from-purple-500/20 to-blue-500/20 text-white border border-purple-500/30 backdrop-blur-sm px-6 py-3 mb-6">
+          <Badge className="bg-gradient-to-r from-purple-500/20 to-blue-500/20 text-gray-900 border border-purple-500/30 backdrop-blur-sm px-6 py-3 mb-6">
             <Rocket className="w-4 h-4 mr-2" />
             Agent Creator
           </Badge>
-          <h1 className="text-5xl md:text-6xl font-bold text-white mb-4 drop-shadow-2xl">
+          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-4 drop-shadow-2xl">
             Create New{' '}
             <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
               AI Agent
             </span>
           </h1>
-          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-700 max-w-2xl mx-auto">
             Add your n8n workflow to the Agent Hub for others to discover and use
           </p>
         </div>
@@ -181,16 +181,16 @@ export default function CreateAgentPage() {
         {/* n8n Integration Guide */}
         <Card className="mb-8 bg-gradient-to-br from-blue-900/50 to-cyan-900/50 border-blue-500/30 backdrop-blur-xl hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-300">
           <CardHeader>
-            <CardTitle className="text-white flex items-center text-xl">
+            <CardTitle className="text-gray-900 flex items-center text-xl">
               <ExternalLink className="w-6 h-6 mr-3 text-blue-400" />
               Need to create a workflow first?
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-gray-300 mb-6 text-lg">
+            <p className="text-gray-700 mb-6 text-lg">
               If you haven't created your n8n workflow yet, start by building it in n8n first.
             </p>
-            <div className="space-y-3 text-gray-300 mb-6 bg-slate-900/50 rounded-xl p-6 border border-slate-700">
+            <div className="space-y-3 text-gray-700 mb-6 bg-transparent/50 rounded-xl p-6 border border-gray-200">
               <p className="flex items-center gap-3">
                 <span className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 font-bold">1</span>
                 Create your workflow in n8n
@@ -230,9 +230,9 @@ export default function CreateAgentPage() {
         <WorkflowImporter onImport={handleWorkflowImport} />
 
         {/* Agent Form */}
-        <Card className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 border-slate-700 backdrop-blur-xl hover:shadow-2xl hover:shadow-purple-500/20 transition-all duration-300">
-          <CardHeader className="border-b border-slate-700">
-            <CardTitle className="text-white flex items-center text-2xl">
+        <Card className="bg-transparent border-gray-200 backdrop-blur-xl hover:shadow-2xl hover:shadow-purple-500/20 transition-all duration-300">
+          <CardHeader className="border-b border-gray-200">
+            <CardTitle className="text-gray-900 flex items-center text-2xl">
               <Sparkles className="w-6 h-6 mr-3 text-purple-400" />
               Agent Details
             </CardTitle>
@@ -242,7 +242,7 @@ export default function CreateAgentPage() {
               {/* Basic Info */}
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-3">
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
                     Agent Name *
                   </label>
                   <Input
@@ -250,19 +250,19 @@ export default function CreateAgentPage() {
                     onChange={(e) => handleInputChange('name', e.target.value)}
                     placeholder="e.g., Text Summarizer"
                     required
-                    className="bg-slate-900 border-slate-700 text-white placeholder:text-gray-500 focus:border-purple-500 rounded-xl"
+                    className="bg-transparent border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-purple-500 rounded-xl"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-3">
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
                     Category
                   </label>
                   <Select value={formData.category} onValueChange={(value) => handleInputChange('category', value)}>
-                    <SelectTrigger className="bg-slate-900 border-slate-700 text-white rounded-xl">
+                    <SelectTrigger className="bg-transparent border-gray-200 text-gray-900 rounded-xl">
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700 text-white">
+                    <SelectContent className="bg-gray-50 border-gray-200 text-gray-900">
                       {categories.map(category => (
                         <SelectItem key={category} value={category}>
                           {category}
@@ -274,7 +274,7 @@ export default function CreateAgentPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-3">
+                <label className="block text-sm font-medium text-gray-700 mb-3">
                   Description *
                 </label>
                 <Textarea
@@ -283,12 +283,12 @@ export default function CreateAgentPage() {
                   placeholder="Describe what your agent does and how it helps users..."
                   rows={4}
                   required
-                  className="bg-slate-900 border-slate-700 text-white placeholder:text-gray-500 focus:border-purple-500 rounded-xl"
+                  className="bg-transparent border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-purple-500 rounded-xl"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-3">
+                <label className="block text-sm font-medium text-gray-700 mb-3">
                   n8n Webhook URL *
                 </label>
                 <div className="flex gap-3">
@@ -297,9 +297,9 @@ export default function CreateAgentPage() {
                     onChange={(e) => handleInputChange('webhook_url', e.target.value)}
                     placeholder="https://your-n8n-instance.com/webhook/your-webhook-id"
                     required
-                    className="flex-1 bg-slate-900 border-slate-700 text-white placeholder:text-gray-500 focus:border-purple-500 rounded-xl"
+                    className="flex-1 bg-transparent border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-purple-500 rounded-xl"
                   />
-                  <Button type="button" className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 rounded-xl" onClick={testWebhook}>
+                  <Button type="button" className="bg-gray-50 border-gray-200 text-gray-900 hover:bg-slate-700 rounded-xl" onClick={testWebhook}>
                     <TestTube className="w-4 h-4 mr-2" />
                     Test
                   </Button>
@@ -312,7 +312,7 @@ export default function CreateAgentPage() {
               {/* Examples */}
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-3">
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
                     Example Input (JSON)
                   </label>
                   <Textarea
@@ -320,12 +320,12 @@ export default function CreateAgentPage() {
                     onChange={(e) => handleInputChange('example_input', e.target.value)}
                     placeholder='{"text": "This is sample input"}'
                     rows={6}
-                    className="font-mono text-sm bg-slate-900 border-slate-700 text-green-400 placeholder:text-gray-600 focus:border-purple-500 rounded-xl"
+                    className="font-mono text-sm bg-transparent border-gray-200 text-green-400 placeholder:text-gray-600 focus:border-purple-500 rounded-xl"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-3">
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
                     Example Output (JSON)
                   </label>
                   <Textarea
@@ -333,7 +333,7 @@ export default function CreateAgentPage() {
                     onChange={(e) => handleInputChange('example_output', e.target.value)}
                     placeholder='{"result": "This is sample output"}'
                     rows={6}
-                    className="font-mono text-sm bg-slate-900 border-slate-700 text-blue-400 placeholder:text-gray-600 focus:border-purple-500 rounded-xl"
+                    className="font-mono text-sm bg-transparent border-gray-200 text-blue-400 placeholder:text-gray-600 focus:border-purple-500 rounded-xl"
                   />
                 </div>
               </div>
@@ -378,3 +378,5 @@ export default function CreateAgentPage() {
     </div>
   );
 }
+
+
